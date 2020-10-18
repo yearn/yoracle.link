@@ -337,6 +337,7 @@ contract UniswapOracle {
 contract UniswapOracleFactory {
     mapping(address => address) public registry;
     mapping(address => bool) public deployed;
+    address [] public oraclesArray;
     address public governance;
     address public constant FACTORY = address(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
 
@@ -358,6 +359,10 @@ contract UniswapOracleFactory {
         address _pair = UniswapV2Library.pairFor(FACTORY, tokenA, tokenB);
         require(_pair != address(0x0), "UniswapOracleFactory::deploy: unknown pair");
         address oracle = address(new UniswapOracle(FACTORY, tokenA, tokenB));
+        bool pairNotDeployed = deployed[_pair] == false;
+        if (pairNotDeployed) {
+            oraclesArray.push(oracle);   
+        }
         deployed[_pair] = true;
         registry[_pair] = oracle;
     }
@@ -368,5 +373,9 @@ contract UniswapOracleFactory {
 
     function quote(address tokenIn, address tokenOut, uint amountIn) external view returns (uint amountOut) {
         return UniswapOracle(registry[getPair(tokenIn, tokenOut)]).consult(tokenIn, amountIn);
+    }
+    
+    function oracles() external view returns (address[] memory) {
+        return oraclesArray;
     }
 }
