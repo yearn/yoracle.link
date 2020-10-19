@@ -133,7 +133,7 @@ interface UniswapRouter {
     function quote(uint amountA, uint reserveA, uint reserveB) external view returns (uint amountB);
 }
 
-contract UniswapInsuranceQuote {
+contract UniQuote {
     using SafeMath for uint;
     UniswapOracleProxy constant ORACLE = UniswapOracleProxy(0x0b5A6b318c39b60e7D8462F888e7fbA89f75D02F);
     UniswapRouter constant ROUTER = UniswapRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);

@@ -170,10 +170,6 @@ library UniswapV2OracleLibrary {
     }
 }
 
-// File: contracts\libraries\SafeMath.sol
-
-pragma solidity =0.6.6;
-
 // a library for performing overflow-safe math, courtesy of DappHub (https://github.com/dapphub/ds-math)
 
 library SafeMath {
@@ -189,10 +185,6 @@ library SafeMath {
         require(y == 0 || (z = x * y) / y == x, 'ds-math-mul-overflow');
     }
 }
-
-// File: contracts\libraries\UniswapV2Library.sol
-
-pragma solidity >=0.5.0;
 
 library UniswapV2Library {
     using SafeMath for uint;
@@ -271,13 +263,9 @@ library UniswapV2Library {
     }
 }
 
-// File: contracts\examples\ExampleOracleSimple.sol
-
-pragma solidity =0.6.6;
-
 // fixed window oracle that recomputes the average price for the entire period once every period
 // note that the price average is only guaranteed to be over at least 1 period, but may be over a longer period
-contract UniswapOracle {
+contract UniOracle {
     using FixedPoint for *;
 
     uint public constant PERIOD = 24 hours;
@@ -334,48 +322,41 @@ contract UniswapOracle {
     }
 }
 
-contract UniswapOracleFactory {
-    mapping(address => address) public registry;
-    mapping(address => bool) public deployed;
-    address [] public oraclesArray;
-    address public governance;
+contract UniOracleFactory {
+    mapping(address => address) public lookups;
+    address[] public _oracles;
+    address[] public _pairs;
     address public constant FACTORY = address(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
 
-    constructor() public {
-        governance = msg.sender;
-    }
-
-    function setGovernance(address _governance) external {
-        require(msg.sender == governance, "UniswapOracleFactory::setGovernance: governance only");
-        governance = _governance;
-    }
+    constructor() public {}
 
     function getPair(address tokenA, address tokenB) public pure returns (address) {
         return UniswapV2Library.pairFor(FACTORY, tokenA, tokenB);
     }
 
     function deploy(address tokenA, address tokenB) external {
-        require(msg.sender == governance, "UniswapOracleFactory::deploy: governance only");
         address _pair = UniswapV2Library.pairFor(FACTORY, tokenA, tokenB);
-        require(_pair != address(0x0), "UniswapOracleFactory::deploy: unknown pair");
-        address oracle = address(new UniswapOracle(FACTORY, tokenA, tokenB));
-        bool pairNotDeployed = deployed[_pair] == false;
-        if (pairNotDeployed) {
-            oraclesArray.push(oracle);   
-        }
-        deployed[_pair] = true;
-        registry[_pair] = oracle;
+        require(_pair != address(0x0), "UniOracleFactory::deploy: unknown pair");
+        require(lookups[_pair] == address(0x0), "UniOracleFactory::deploy: pair already exists");
+        address _oracle = address(new UniOracle(FACTORY, tokenA, tokenB));
+        lookups[_pair] = _oracle;
+        _pairs.push(_pair);
+        _oracles.push(_oracle);
     }
 
     function update(address tokenA, address tokenB) external {
-        UniswapOracle(registry[getPair(tokenA, tokenB)]).update();
+        UniOracle(lookups[getPair(tokenA, tokenB)]).update();
     }
 
     function quote(address tokenIn, address tokenOut, uint amountIn) external view returns (uint amountOut) {
-        return UniswapOracle(registry[getPair(tokenIn, tokenOut)]).consult(tokenIn, amountIn);
+        return UniOracle(lookups[getPair(tokenIn, tokenOut)]).consult(tokenIn, amountIn);
     }
-    
+
     function oracles() external view returns (address[] memory) {
-        return oraclesArray;
+        return _oracles;
+    }
+
+    function pairs() external view returns (address[] memory) {
+        return _pairs;
     }
 }
