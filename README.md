@@ -4,9 +4,9 @@ UniswapV2Oracle is an on-chain oracle for UniswapV2 pairs. It allows any pair to
 
 ## UniswapV2Oracle
 
-UniswapV2Oracle are sliding window oracle that uses observations collected over a window to provide moving price averages in the past `windowSize` with a precision of `windowSize / granularity`.  
+UniswapV2Oracle are sliding window oracle that uses observations collected over a window to provide moving price averages in the past `windowSize` with a precision of `windowSize / granularity`.
 
-The `windowSize` was set to `4 hours`. Funding rates on major perpetual platforms are updated roughly every `8 hours`, for this reason `4 hours` was selected. The granularity is set to `4`, translating to roughly `1` reading every `hour`.  
+The `windowSize` was set to `4 hours`. Funding rates on major perpetual platforms are updated roughly every `8 hours`, for this reason `4 hours` was selected. The granularity is set to `4`, translating to roughly `1` reading every `hour`.
 
 ## Integrating
 
@@ -17,7 +17,7 @@ function consult(address tokenIn, uint amountIn, address tokenOut) external view
 
 Example;
 
-```
+```text
 interface IUniswapV2Oracle {
   function consult(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut);
 }
