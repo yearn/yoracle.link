@@ -1,4 +1,4 @@
-# Introduction to UniswapV2Oracle
+# UniswapV2Oracle
 
 {% hint style="info" %}
 These docs are in active development.
