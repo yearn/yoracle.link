@@ -1,32 +1,52 @@
-UniswapOracleFactory [0x61da8b0808CEA5281A912Cd85421A6D12261D136](https://etherscan.io/address/0x61da8b0808cea5281a912cd85421a6d12261d136)
+# Introduction to UniswapV2Oracle
 
-Quotes for how much LP tokens are worth in a given output currency
+{% hint style="info" %}
+These docs are in active development.
+{% endhint %}
 
-For example how much is 100 LP tokens of ETH/BTC worth in BTC
+UniswapV2Oracle is an on-chain oracle for UniswapV2 pairs. It allows any pair to be added in a permissionless fashion.
 
-ETH/WBTC pair 0xBb2b8038a1640196FbE3e38816F3e67Cba72D940
+## UniswapV2Oracle
 
-ETH 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+UniswapV2Oracle are sliding window oracle that uses observations collected over a window to provide moving price averages in the past `windowSize` with a precision of `windowSize / granularity`.  
 
-WBTC 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
+The `windowSize` was set to `4 hours`. Funding rates on major perpetual platforms are updated roughly every `8 hours`, for this reason `4 hours` was selected. The granularity is set to `4`, translating to roughly `1` reading every `hour`.  
 
-WETH	0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+## Integrating
 
-ETH-WBTC	0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
-ETH-USDC	0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-ETH-USDT	0xdAC17F958D2ee523a2206206994597C13D831ec7
-ETH-DAI	0x6B175474E89094C44Da98b954EedeAC495271d0F
-ETH-UNI	0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984
-CORE-ETH	0x62359Ed7505Efc61FF1D56fEF82158CcaffA23D7
-DPI-ETH	0x1494CA1F11D487c2bBe4543E90080AeBa4BA3C2b
-PICKLE-ETH	0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5
-FARM-ETH	0xa0246c9032bC3A600820415aE600c6388619A14D
-LINK-ETH	0x514910771AF9Ca656af840dff83E8264EcF986CA
-YFI-ETH	0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e
-MKR-ETH	0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2
-AAVE-ETH	0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9
-REN-ETH	0x408e41876cCCDC0F92210600ef50372656052a38
-MTA-ETH	0xa3BeD4E1c75D00fa6f4E5E6922DB7261B5E9AcD2
-SNX-ETH	0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F
-wNXM-ETH	0x0d438F3b5175Bebc262bF23753C1E53d03432bDE
-COMP-ETH	0xc00e94Cb662C3520282E6f5717214004A7f26888
+Using UniswapV2Oracle in code is simple;
+
+```
+// returns the amount out corresponding to the amount in for a given token using the moving average over the time
+// range [now - [windowSize, windowSize - periodSize * 2], now]
+// update must have been called for the bucket corresponding to timestamp `now - windowSize`
+function consult(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut)
+```
+
+Example;
+
+```
+interface IUniswapV2Oracle {
+  function consult(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut);
+}
+...
+IUniswapV2Oracle public constant UniswapV2Oracle = IUniswapV2Oracle(0xa661F3644A59A5A5D768ee2765794F1cD084403d);
+...
+uint _ethOut = UniswapV2Oracle.consult(YFI, 1e18, ETH);
+```
+
+## Pairs
+
+UniswapV2Oracle [0xa661F3644A59A5A5D768ee2765794F1cD084403d](https://etherscan.io/address/0xa661F3644A59A5A5D768ee2765794F1cD084403d)  
+
+Pair | Address | Asset
+-- | -- | --
+ETH-WBTC | [0xBb2b8038a1640196FbE3e38816F3e67Cba72D940](https://etherscan.io/address/0xBb2b8038a1640196FbE3e38816F3e67Cba72D940) | [0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599](https://etherscan.io/address/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599)
+ETH-USDC | [0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc](https://etherscan.io/address/0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc) |	[0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48)
+ETH-USDT | [0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852](https://etherscan.io/address/0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852) |	[0xdAC17F958D2ee523a2206206994597C13D831ec7](https://etherscan.io/address/0xdAC17F958D2ee523a2206206994597C13D831ec7)
+ETH-DAI | [0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11](https://etherscan.io/address/0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11) | [0x6B175474E89094C44Da98b954EedeAC495271d0F](https://etherscan.io/address/0x6B175474E89094C44Da98b954EedeAC495271d0F)
+ETH-UNI | [0xd3d2E2692501A5c9Ca623199D38826e513033a17](https://etherscan.io/address/0xd3d2E2692501A5c9Ca623199D38826e513033a17) | [0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984](https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984)
+YFI-ETH | [0x2fDbAdf3C4D5A8666Bc06645B8358ab803996E28](https://etherscan.io/address/0x2fDbAdf3C4D5A8666Bc06645B8358ab803996E28) | [0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e](https://etherscan.io/address/0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e)
+MKR-ETH | [0xC2aDdA861F89bBB333c90c492cB837741916A225](https://etherscan.io/address/0xC2aDdA861F89bBB333c90c492cB837741916A225) | [0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2](https://etherscan.io/address/0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2)
+AAVE-ETH | [0xDFC14d2Af169B0D36C4EFF567Ada9b2E0CAE044f](https://etherscan.io/address/0xDFC14d2Af169B0D36C4EFF567Ada9b2E0CAE044f)| [0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9](https://etherscan.io/address/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9)
+COMP-ETH | [0xCFfDdeD873554F362Ac02f8Fb1f02E5ada10516f](https://etherscan.io/address/0xCFfDdeD873554F362Ac02f8Fb1f02E5ada10516f) | [0xc00e94Cb662C3520282E6f5717214004A7f26888](https://etherscan.io/address/0xc00e94Cb662C3520282E6f5717214004A7f26888)
