@@ -273,8 +273,9 @@ contract UniswapV2Oracle {
     }
 
     modifier upkeep() {
-      _;
-      KPR.worked(msg.sender);
+        require(KPR.isKeeper(msg.sender), "::isKeeper: keeper is not registered");
+        _;
+        KPR.worked(msg.sender);
     }
 
     address public governance;
@@ -361,12 +362,12 @@ contract UniswapV2Oracle {
         _pairs.push(pair);
     }
 
-    function work() public keeper upkeep {
-        bool worked = updateAll();
+    function work() public upkeep {
+        bool worked = _updateAll();
         require(worked, "UniswapV2Oracle: no work");
     }
 
-    function updateAll() public keeper returns (bool updated) {
+    function _updateAll() internal returns (bool updated) {
         for (uint i = 0; i < _pairs.length; i++) {
             if (_update(_pairs[i])) {
                 updated = true;
