@@ -357,7 +357,12 @@ contract UniswapV2Oracle {
         _pairs.push(pair);
     }
 
-    function updateAll() external returns (bool updated) {
+    function work() public upkeep {
+        bool worked = updateAll();
+        require(worked, "UniswapV2Oracle: no work");
+    }
+
+    function updateAll() public returns (bool updated) {
         for (uint i = 0; i < _pairs.length; i++) {
             if (_update(_pairs[i])) {
                 updated = true;
@@ -404,7 +409,7 @@ contract UniswapV2Oracle {
         return false;
     }
 
-    function _update(address pair) internal upkeep returns (bool) {
+    function _update(address pair) internal returns (bool) {
         // populate the array with empty observations (first call only)
         for (uint i = pairObservations[pair].length; i < granularity; i++) {
             pairObservations[pair].push();
