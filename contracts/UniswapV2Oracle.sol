@@ -267,8 +267,12 @@ contract UniswapV2Oracle {
         uint price1Cumulative;
     }
 
+    modifier keeper() {
+        require(KPR.isKeeper(msg.sender), "::isKeeper: keeper is not registered");
+        _;
+    }
+
     modifier upkeep() {
-      require(KPR.isKeeper(msg.sender), "::isKeeper: keeper is not registered");
       _;
       KPR.worked(msg.sender);
     }
@@ -338,13 +342,13 @@ contract UniswapV2Oracle {
         firstObservation = pairObservations[pair][firstObservationIndex];
     }
 
-    function updatePair(address pair) external returns (bool) {
+    function updatePair(address pair) external keeper returns (bool) {
         return _update(pair);
     }
 
     // update the cumulative price for the observation at the current timestamp. each observation is updated at most
     // once per epoch period.
-    function update(address tokenA, address tokenB) external returns (bool) {
+    function update(address tokenA, address tokenB) external keeper returns (bool) {
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
         return _update(pair);
     }
@@ -357,12 +361,12 @@ contract UniswapV2Oracle {
         _pairs.push(pair);
     }
 
-    function work() public upkeep {
+    function work() public keeper upkeep {
         bool worked = updateAll();
         require(worked, "UniswapV2Oracle: no work");
     }
 
-    function updateAll() public returns (bool updated) {
+    function updateAll() public keeper returns (bool updated) {
         for (uint i = 0; i < _pairs.length; i++) {
             if (_update(_pairs[i])) {
                 updated = true;
@@ -370,7 +374,7 @@ contract UniswapV2Oracle {
         }
     }
 
-    function updateFor(uint i, uint length) external returns (bool updated) {
+    function updateFor(uint i, uint length) external keeper returns (bool updated) {
         for (; i < length; i++) {
             if (_update(_pairs[i])) {
                 updated = true;
