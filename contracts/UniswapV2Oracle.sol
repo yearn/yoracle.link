@@ -1,4 +1,5 @@
-pragma solidity =0.6.6;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.6.12;
 
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
@@ -249,6 +250,11 @@ library UniswapV2Library {
     }
 }
 
+interface IKeep3r {
+    function isKeeper(address) external returns (bool);
+    function worked(address keeper) external;
+}
+
 // sliding window oracle that uses observations collected over a window to provide moving price averages in the past
 // `windowSize` with a precision of `windowSize / granularity`
 contract UniswapV2Oracle {
@@ -261,6 +267,34 @@ contract UniswapV2Oracle {
         uint price1Cumulative;
     }
 
+    modifier upkeep() {
+      require(KPR.isKeeper(msg.sender), "::isKeeper: keeper is not registered");
+      _;
+      KPR.worked(msg.sender);
+    }
+
+    address public governance;
+    address public pendingGovernance;
+
+    /**
+     * @notice Allows governance to change governance (for future upgradability)
+     * @param _governance new governance address to set
+     */
+    function setGovernance(address _governance) external {
+        require(msg.sender == governance, "setGovernance: !gov");
+        pendingGovernance = _governance;
+    }
+
+    /**
+     * @notice Allows pendingGovernance to accept their role as governance (protection pattern)
+     */
+    function acceptGovernance() external {
+        require(msg.sender == pendingGovernance, "acceptGovernance: !pendingGov");
+        governance = pendingGovernance;
+    }
+
+    IKeep3r public constant KPR = IKeep3r(0xB63650C42d6fCcA02f5353A711cB85400dB6a8FE);
+
     address public immutable factory = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     // the desired amount of time over which the moving average should be computed, e.g. 24 hours
     uint public immutable windowSize = 14400;
@@ -271,12 +305,13 @@ contract UniswapV2Oracle {
     // e.g. if the window size is 24 hours, and the granularity is 24, the oracle will return the average price for
     //   the period:
     //   [now - [22 hours, 24 hours], now]
-    uint8 public immutable granularity = 4;
+    uint8 public immutable granularity = 8;
     // this is redundant with granularity and windowSize, but stored for gas savings & informational purposes.
-    uint public immutable periodSize = 3600;
+    uint public immutable periodSize = 1800;
 
     address[] internal _pairs;
     mapping(address => bool) internal _known;
+    mapping(address => uint) public lastUpdated;
 
     function pairs() external view returns (address[] memory) {
         return _pairs;
@@ -285,7 +320,9 @@ contract UniswapV2Oracle {
     // mapping from pair address to a list of price observations of that pair
     mapping(address => Observation[]) public pairObservations;
 
-    constructor() public {}
+    constructor() public {
+        governance = msg.sender;
+    }
 
     // returns the index of the observation corresponding to the given timestamp
     function observationIndexOf(uint timestamp) public view returns (uint8 index) {
@@ -313,6 +350,7 @@ contract UniswapV2Oracle {
     }
 
     function add(address tokenA, address tokenB) external {
+        require(msg.sender == governance, "UniswapV2Oracle::add: !gov");
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
         require(!_known[pair], "known");
         _known[pair] = true;
@@ -335,7 +373,38 @@ contract UniswapV2Oracle {
         }
     }
 
-    function _update(address pair) internal returns (bool) {
+    function updateableList() external view returns (address[] memory list) {
+        uint _index = 0;
+        for (uint i = 0; i < _pairs.length; i++) {
+            if (updateable(_pairs[i])) {
+               list[_index++] = _pairs[i];
+            }
+        }
+    }
+
+    function updateable(address pair) public view returns (bool) {
+        return (block.timestamp - lastUpdated[pair]) > periodSize;
+    }
+
+    function updateable() external view returns (bool) {
+        for (uint i = 0; i < _pairs.length; i++) {
+            if (updateable(_pairs[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function updateableFor(uint i, uint length) external view returns (bool) {
+        for (; i < length; i++) {
+            if (updateable(_pairs[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function _update(address pair) internal upkeep returns (bool) {
         // populate the array with empty observations (first call only)
         for (uint i = pairObservations[pair].length; i < granularity; i++) {
             pairObservations[pair].push();
@@ -350,6 +419,7 @@ contract UniswapV2Oracle {
         if (timeElapsed > periodSize) {
             (uint price0Cumulative, uint price1Cumulative,) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
             observation.timestamp = block.timestamp;
+            lastUpdated[pair] = block.timestamp;
             observation.price0Cumulative = price0Cumulative;
             observation.price1Cumulative = price1Cumulative;
             return true;
