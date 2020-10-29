@@ -6,7 +6,7 @@ UniswapV2Oracle is an on-chain oracle for UniswapV2 pairs. It allows any pair to
 
 UniswapV2Oracles are sliding window oracles that uses observations collected over a window to provide moving price averages in the past `windowSize` with a precision of `windowSize / granularity`.
 
-The `windowSize` was set to `4 hours`. Funding rates on major perpetual platforms are updated roughly every `8 hours`, for this reason `4 hours` was selected. The granularity is set to `4`, translating to roughly `1` reading every `hour`.
+The `windowSize` was set to `4 hours`. Funding rates on major perpetual platforms are updated roughly every `8 hours`, for this reason `4 hours` was selected. The granularity is set to `8`, translating to roughly `2` reading every `hour`.
 
 ## Integrating
 
@@ -34,7 +34,7 @@ uint _ethOut = UniswapV2Oracle.consult(YFI, 1e18, ETH);
 
 ## Beta Deployment
 
-UniswapV2Oracle [0x0e494045D79E2e2E9B30c303925142C60430B19A](https://etherscan.io/address/0x0e494045D79E2e2E9B30c303925142C60430B19A)  
+UniswapV2Oracle [0x127a2975c4E1c75f1ed4757a861bbd42523DB035](https://etherscan.io/address/0x127a2975c4E1c75f1ed4757a861bbd42523DB035)  
 
 
 ## Pairs
@@ -64,3 +64,7 @@ YFI |  [0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e](https://etherscan.io/address
 MKR |  [0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2](https://etherscan.io/address/0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2)
 AAVE |  [0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9](https://etherscan.io/address/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9)
 COMP |  [0xc00e94Cb662C3520282E6f5717214004A7f26888](https://etherscan.io/address/0xc00e94Cb662C3520282E6f5717214004A7f26888)
+KP3R |  [0x1ceb5cb57c4d4e2b2433641b95dd330a33185a44](https://etherscan.io/address/0x1ceb5cb57c4d4e2b2433641b95dd330a33185a44)
+SNX |  [0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f](https://etherscan.io/address/0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f)
+LINK |  [0x514910771af9ca656af840dff83e8264ecf986ca](https://etherscan.io/address/0x514910771af9ca656af840dff83e8264ecf986ca)
+CRV |  [0xd533a949740bb3306d119cc777fa900ba034cd52](https://etherscan.io/address/0xd533a949740bb3306d119cc777fa900ba034cd52)
