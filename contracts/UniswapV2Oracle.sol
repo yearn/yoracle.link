@@ -159,17 +159,185 @@ library UniswapV2OracleLibrary {
 
 // a library for performing overflow-safe math, courtesy of DappHub (https://github.com/dapphub/ds-math)
 
+/**
+ * @dev Wrappers over Solidity's arithmetic operations with added overflow
+ * checks.
+ *
+ * Arithmetic operations in Solidity wrap on overflow. This can easily result
+ * in bugs, because programmers usually assume that an overflow raises an
+ * error, which is the standard behavior in high level programming languages.
+ * `SafeMath` restores this intuition by reverting the transaction when an
+ * operation overflows.
+ *
+ * Using this library instead of the unchecked operations eliminates an entire
+ * class of bugs, so it's recommended to use it always.
+ */
 library SafeMath {
-    function add(uint x, uint y) internal pure returns (uint z) {
-        require((z = x + y) >= x, 'ds-math-add-overflow');
+    /**
+     * @dev Returns the addition of two unsigned integers, reverting on overflow.
+     *
+     * Counterpart to Solidity's `+` operator.
+     *
+     * Requirements:
+     * - Addition cannot overflow.
+     */
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        require(c >= a, "SafeMath: addition overflow");
+
+        return c;
     }
 
-    function sub(uint x, uint y) internal pure returns (uint z) {
-        require((z = x - y) <= x, 'ds-math-sub-underflow');
+    /**
+     * @dev Returns the addition of two unsigned integers, reverting with custom message on overflow.
+     *
+     * Counterpart to Solidity's `+` operator.
+     *
+     * Requirements:
+     * - Addition cannot overflow.
+     */
+    function add(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        uint256 c = a + b;
+        require(c >= a, errorMessage);
+
+        return c;
     }
 
-    function mul(uint x, uint y) internal pure returns (uint z) {
-        require(y == 0 || (z = x * y) / y == x, 'ds-math-mul-overflow');
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting on underflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     * - Subtraction cannot underflow.
+     */
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        return sub(a, b, "SafeMath: subtraction underflow");
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on underflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     * - Subtraction cannot underflow.
+     */
+    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b <= a, errorMessage);
+        uint256 c = a - b;
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the multiplication of two unsigned integers, reverting on overflow.
+     *
+     * Counterpart to Solidity's `*` operator.
+     *
+     * Requirements:
+     * - Multiplication cannot overflow.
+     */
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b, "SafeMath: multiplication overflow");
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the multiplication of two unsigned integers, reverting on overflow.
+     *
+     * Counterpart to Solidity's `*` operator.
+     *
+     * Requirements:
+     * - Multiplication cannot overflow.
+     */
+    function mul(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b, errorMessage);
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers.
+     * Reverts on division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        return div(a, b, "SafeMath: division by zero");
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers.
+     * Reverts with custom message on division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        // Solidity only automatically asserts when dividing by 0
+        require(b > 0, errorMessage);
+        uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        return mod(a, b, "SafeMath: modulo by zero");
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts with custom message when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b != 0, errorMessage);
+        return a % b;
     }
 }
 
@@ -250,13 +418,12 @@ library UniswapV2Library {
     }
 }
 
-interface IKeep3r {
+interface IKeep3rV1 {
     function isKeeper(address) external returns (bool);
     function worked(address keeper) external;
 }
 
-// sliding window oracle that uses observations collected over a window to provide moving price averages in the past
-// `windowSize` with a precision of `windowSize / granularity`
+// sliding oracle that uses observations collected to provide moving price averages in the past
 contract UniswapV2Oracle {
     using FixedPoint for *;
     using SafeMath for uint;
@@ -265,17 +432,18 @@ contract UniswapV2Oracle {
         uint timestamp;
         uint price0Cumulative;
         uint price1Cumulative;
+        uint timeElapsed;
     }
 
     modifier keeper() {
-        require(KPR.isKeeper(msg.sender), "::isKeeper: keeper is not registered");
+        require(KP3R.isKeeper(msg.sender), "::isKeeper: keeper is not registered");
         _;
     }
 
     modifier upkeep() {
-        require(KPR.isKeeper(msg.sender), "::isKeeper: keeper is not registered");
+        require(KP3R.isKeeper(msg.sender), "::isKeeper: keeper is not registered");
         _;
-        KPR.worked(msg.sender);
+        KP3R.worked(msg.sender);
     }
 
     address public governance;
@@ -298,25 +466,19 @@ contract UniswapV2Oracle {
         governance = pendingGovernance;
     }
 
-    IKeep3r public constant KPR = IKeep3r(0xB63650C42d6fCcA02f5353A711cB85400dB6a8FE);
+    function setKeep3r(address _keep3r) external {
+        require(msg.sender == governance, "setKeep3r: !gov");
+        KP3R = IKeep3rV1(_keep3r);
+    }
 
-    address public immutable factory = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
-    // the desired amount of time over which the moving average should be computed, e.g. 24 hours
-    uint public immutable windowSize = 14400;
-    // the number of observations stored for each pair, i.e. how many price observations are stored for the window.
-    // as granularity increases from 1, more frequent updates are needed, but moving averages become more precise.
-    // averages are computed over intervals with sizes in the range:
-    //   [windowSize - (windowSize / granularity) * 2, windowSize]
-    // e.g. if the window size is 24 hours, and the granularity is 24, the oracle will return the average price for
-    //   the period:
-    //   [now - [22 hours, 24 hours], now]
-    uint8 public immutable granularity = 8;
+    IKeep3rV1 public KP3R;
+
+    address public constant factory = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     // this is redundant with granularity and windowSize, but stored for gas savings & informational purposes.
-    uint public immutable periodSize = 1800;
+    uint public constant periodSize = 1800;
 
     address[] internal _pairs;
     mapping(address => bool) internal _known;
-    mapping(address => uint) public lastUpdated;
 
     function pairs() external view returns (address[] memory) {
         return _pairs;
@@ -324,31 +486,18 @@ contract UniswapV2Oracle {
 
     // mapping from pair address to a list of price observations of that pair
     mapping(address => Observation[]) public pairObservations;
+    mapping(address => uint) public lastUpdated;
+    mapping(address => Observation) public lastObservation;
 
-    constructor() public {
+    constructor(address _keep3r) public {
         governance = msg.sender;
-    }
-
-    // returns the index of the observation corresponding to the given timestamp
-    function observationIndexOf(uint timestamp) public view returns (uint8 index) {
-        uint epochPeriod = timestamp / periodSize;
-        return uint8(epochPeriod % granularity);
-    }
-
-    // returns the observation from the oldest epoch (at the beginning of the window) relative to the current time
-    function getFirstObservationInWindow(address pair) private view returns (Observation storage firstObservation) {
-        uint8 observationIndex = observationIndexOf(block.timestamp);
-        // no overflow issue. if observationIndex + 1 overflows, result is still zero.
-        uint8 firstObservationIndex = (observationIndex + 1) % granularity;
-        firstObservation = pairObservations[pair][firstObservationIndex];
+        KP3R = IKeep3rV1(_keep3r);
     }
 
     function updatePair(address pair) external keeper returns (bool) {
         return _update(pair);
     }
 
-    // update the cumulative price for the observation at the current timestamp. each observation is updated at most
-    // once per epoch period.
     function update(address tokenA, address tokenB) external keeper returns (bool) {
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
         return _update(pair);
@@ -360,11 +509,16 @@ contract UniswapV2Oracle {
         require(!_known[pair], "known");
         _known[pair] = true;
         _pairs.push(pair);
+
+        (uint price0Cumulative, uint price1Cumulative,) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
+        lastObservation[pair] = Observation(block.timestamp, price0Cumulative, price1Cumulative, 0);
+        pairObservations[pair].push(lastObservation[pair]);
+        lastUpdated[pair] = block.timestamp;
     }
 
     function work() public upkeep {
         bool worked = _updateAll();
-        require(worked, "UniswapV2Oracle: no work");
+        require(worked, "UniswapV2Oracle: !work");
     }
 
     function _updateAll() internal returns (bool updated) {
@@ -383,31 +537,13 @@ contract UniswapV2Oracle {
         }
     }
 
-    function updateableList() external view returns (address[] memory list) {
-        uint _index = 0;
-        for (uint i = 0; i < _pairs.length; i++) {
-            if (updateable(_pairs[i])) {
-               list[_index++] = _pairs[i];
-            }
-        }
-    }
-
-    function updateable(address pair) public view returns (bool) {
+    function workable(address pair) public view returns (bool) {
         return (block.timestamp - lastUpdated[pair]) > periodSize;
     }
 
-    function updateable() external view returns (bool) {
+    function workable() external view returns (bool) {
         for (uint i = 0; i < _pairs.length; i++) {
-            if (updateable(_pairs[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function updateableFor(uint i, uint length) external view returns (bool) {
-        for (; i < length; i++) {
-            if (updateable(_pairs[i])) {
+            if (workable(_pairs[i])) {
                 return true;
             }
         }
@@ -415,31 +551,18 @@ contract UniswapV2Oracle {
     }
 
     function _update(address pair) internal returns (bool) {
-        // populate the array with empty observations (first call only)
-        for (uint i = pairObservations[pair].length; i < granularity; i++) {
-            pairObservations[pair].push();
-        }
-
-        // get the observation for the current period
-        uint8 observationIndex = observationIndexOf(block.timestamp);
-        Observation storage observation = pairObservations[pair][observationIndex];
-
         // we only want to commit updates once per period (i.e. windowSize / granularity)
-        uint timeElapsed = block.timestamp - observation.timestamp;
+        uint timeElapsed = block.timestamp - lastUpdated[pair];
         if (timeElapsed > periodSize) {
             (uint price0Cumulative, uint price1Cumulative,) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
-            observation.timestamp = block.timestamp;
+            lastObservation[pair] = Observation(block.timestamp, price0Cumulative, price1Cumulative, timeElapsed);
+            pairObservations[pair].push(lastObservation[pair]);
             lastUpdated[pair] = block.timestamp;
-            observation.price0Cumulative = price0Cumulative;
-            observation.price1Cumulative = price1Cumulative;
             return true;
         }
-
         return false;
     }
 
-    // given the cumulative prices of the start and end of a period, and the length of the period, compute the average
-    // price in terms of how much amount out is received for the amount in
     function computeAmountOut(
         uint priceCumulativeStart, uint priceCumulativeEnd,
         uint timeElapsed, uint amountIn
@@ -451,25 +574,51 @@ contract UniswapV2Oracle {
         amountOut = priceAverage.mul(amountIn).decode144();
     }
 
-    // returns the amount out corresponding to the amount in for a given token using the moving average over the time
-    // range [now - [windowSize, windowSize - periodSize * 2], now]
-    // update must have been called for the bucket corresponding to timestamp `now - windowSize`
-    function consult(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut) {
+    function _valid(address pair, uint age) internal view returns (bool) {
+        return (block.timestamp - lastUpdated[pair]) <= age;
+    }
+
+    function current(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut) {
         address pair = UniswapV2Library.pairFor(factory, tokenIn, tokenOut);
-        Observation storage firstObservation = getFirstObservationInWindow(pair);
-
-        uint timeElapsed = block.timestamp - firstObservation.timestamp;
-        require(timeElapsed <= windowSize, 'SlidingWindowOracle: MISSING_HISTORICAL_OBSERVATION');
-        // should never happen.
-        require(timeElapsed >= windowSize - periodSize * 2, 'SlidingWindowOracle: UNEXPECTED_TIME_ELAPSED');
-
-        (uint price0Cumulative, uint price1Cumulative,) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
+        require(_valid(pair, periodSize.mul(2)), "UniswapV2Oracle::quote: stale prices");
         (address token0,) = UniswapV2Library.sortTokens(tokenIn, tokenOut);
 
+        (uint price0Cumulative, uint price1Cumulative,) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
+        uint timeElapsed = block.timestamp - lastObservation[pair].timestamp;
+
         if (token0 == tokenIn) {
-            return computeAmountOut(firstObservation.price0Cumulative, price0Cumulative, timeElapsed, amountIn);
+            return computeAmountOut(lastObservation[pair].price0Cumulative, price0Cumulative, timeElapsed, amountIn);
         } else {
-            return computeAmountOut(firstObservation.price1Cumulative, price1Cumulative, timeElapsed, amountIn);
+            return computeAmountOut(lastObservation[pair].price1Cumulative, price1Cumulative, timeElapsed, amountIn);
         }
+    }
+
+    function quote(address tokenIn, uint amountIn, address tokenOut, uint granularity) external view returns (uint amountOut) {
+        address pair = UniswapV2Library.pairFor(factory, tokenIn, tokenOut);
+        require(_valid(pair, periodSize.mul(granularity)), "UniswapV2Oracle::quote: stale prices");
+        (address token0,) = UniswapV2Library.sortTokens(tokenIn, tokenOut);
+
+        uint priceAverageCumulative = 0;
+        uint length = pairObservations[pair].length-1;
+        uint i = length.sub(granularity);
+
+
+        uint nextIndex = 0;
+        if (token0 == tokenIn) {
+            for (; i < length; i++) {
+                nextIndex = i+1;
+                priceAverageCumulative += computeAmountOut(
+                    pairObservations[pair][i].price0Cumulative,
+                    pairObservations[pair][nextIndex].price0Cumulative, pairObservations[pair][nextIndex].timeElapsed, amountIn);
+            }
+        } else {
+            for (; i < length; i++) {
+                nextIndex = i+1;
+                priceAverageCumulative += computeAmountOut(
+                    pairObservations[pair][i].price1Cumulative,
+                    pairObservations[pair][nextIndex].price1Cumulative, pairObservations[pair][nextIndex].timeElapsed, amountIn);
+            }
+        }
+        return priceAverageCumulative.div(granularity);
     }
 }
