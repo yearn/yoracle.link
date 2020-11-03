@@ -466,12 +466,7 @@ contract UniswapV2Oracle {
         governance = pendingGovernance;
     }
 
-    function setKeep3r(address _keep3r) external {
-        require(msg.sender == governance, "setKeep3r: !gov");
-        KP3R = IKeep3rV1(_keep3r);
-    }
-
-    IKeep3rV1 public KP3R;
+    IKeep3rV1 public constant KP3R = IKeep3rV1(0x1cEB5cB57C4D4E2b2433641b95Dd330A33185A44);
 
     address public constant factory = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     // this is redundant with granularity and windowSize, but stored for gas savings & informational purposes.
@@ -489,9 +484,8 @@ contract UniswapV2Oracle {
     mapping(address => uint) public lastUpdated;
     mapping(address => Observation) public lastObservation;
 
-    constructor(address _keep3r) public {
+    constructor() public {
         governance = msg.sender;
-        KP3R = IKeep3rV1(_keep3r);
     }
 
     function updatePair(address pair) external keeper returns (bool) {
@@ -585,7 +579,7 @@ contract UniswapV2Oracle {
 
         (uint price0Cumulative, uint price1Cumulative,) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
         uint timeElapsed = block.timestamp - lastObservation[pair].timestamp;
-
+        timeElapsed = timeElapsed == 0 ? 1 : timeElapsed;
         if (token0 == tokenIn) {
             return computeAmountOut(lastObservation[pair].price0Cumulative, price0Cumulative, timeElapsed, amountIn);
         } else {
