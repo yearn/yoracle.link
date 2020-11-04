@@ -515,6 +515,11 @@ contract UniswapV2Oracle {
         require(worked, "UniswapV2Oracle: !work");
     }
 
+    function workForFree() public keeper {
+        bool worked = _updateAll();
+        require(worked, "UniswapV2Oracle: !work");
+    }
+
     function _updateAll() internal returns (bool updated) {
         for (uint i = 0; i < _pairs.length; i++) {
             if (_update(_pairs[i])) {
@@ -577,13 +582,18 @@ contract UniswapV2Oracle {
         require(_valid(pair, periodSize.mul(2)), "UniswapV2Oracle::quote: stale prices");
         (address token0,) = UniswapV2Library.sortTokens(tokenIn, tokenOut);
 
+        Observation memory _observation = lastObservation[pair];
         (uint price0Cumulative, uint price1Cumulative,) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
-        uint timeElapsed = block.timestamp - lastObservation[pair].timestamp;
+        if (block.timestamp == _observation.timestamp) {
+            _observation = pairObservations[pair][pairObservations[pair].length-2];
+        }
+
+        uint timeElapsed = block.timestamp - _observation.timestamp;
         timeElapsed = timeElapsed == 0 ? 1 : timeElapsed;
         if (token0 == tokenIn) {
-            return computeAmountOut(lastObservation[pair].price0Cumulative, price0Cumulative, timeElapsed, amountIn);
+            return computeAmountOut(_observation.price0Cumulative, price0Cumulative, timeElapsed, amountIn);
         } else {
-            return computeAmountOut(lastObservation[pair].price1Cumulative, price1Cumulative, timeElapsed, amountIn);
+            return computeAmountOut(_observation.price1Cumulative, price1Cumulative, timeElapsed, amountIn);
         }
     }
 

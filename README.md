@@ -34,7 +34,7 @@ uint _ethOut = UniswapV2Oracle.consult(YFI, 1e18, ETH);
 
 ## Beta Deployment
 
-UniswapV2Oracle [0x127a2975c4E1c75f1ed4757a861bbd42523DB035](https://etherscan.io/address/0x127a2975c4E1c75f1ed4757a861bbd42523DB035)  
+UniswapV2Oracle [0x61A2117D222546dB94Bc5914Ea12f1DC38DE0D8e](https://etherscan.io/address/0x61A2117D222546dB94Bc5914Ea12f1DC38DE0D8e)  
 
 
 ## Pairs
