@@ -1,40 +1,40 @@
-# UniswapV2Oracle
+# UniswapV2SlidingOracle
 
-UniswapV2Oracle is an on-chain oracle for UniswapV2 pairs. It allows any pair to be added in a permissionless fashion.
+UniswapV2SlidingOracle is an on-chain oracle for UniswapV2 pairs.
 
-## UniswapV2Oracle
+## UniswapV2SlidingOracle
 
-UniswapV2Oracles are sliding window oracles that uses observations collected over a window to provide moving price averages in the past `windowSize` with a precision of `windowSize / granularity`.
+UniswapV2SlidingOracles are sliding window oracles that uses observations collected over a window to provide moving price averages in the past `windowSize` with a precision of `windowSize / granularity`.
 
-The `windowSize` was set to `4 hours`. Funding rates on major perpetual platforms are updated roughly every `8 hours`, for this reason `4 hours` was selected. The granularity is set to `8`, translating to roughly `2` reading every `hour`.
+The `windowSize` is based on the `granularity` supplied by the user. There is a reading every `periodSize` minutes.
 
 ## Integrating
 
 ```
 // returns the amount out corresponding to the amount in for a given token using the moving average over the time
-function consult(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut)
+function current(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut)
 ```
 
 Example;
 
 ```text
 interface IUniswapV2Oracle {
-  function consult(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut);
+  function current(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut);
 }
 
 ...
 
-IUniswapV2Oracle public constant UniswapV2Oracle = IUniswapV2Oracle(0xa661F3644A59A5A5D768ee2765794F1cD084403d);
+IUniswapV2Oracle public constant UniswapV2Oracle = IUniswapV2Oracle(0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885);
 
 ...
 
-uint _ethOut = UniswapV2Oracle.consult(YFI, 1e18, ETH);
+uint _ethOut = UniswapV2Oracle.current(YFI, 1e18, ETH);
 
 ```
 
 ## Beta Deployment
 
-UniswapV2Oracle [0x61A2117D222546dB94Bc5914Ea12f1DC38DE0D8e](https://etherscan.io/address/0x61A2117D222546dB94Bc5914Ea12f1DC38DE0D8e)  
+UniswapV2Oracle [0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885](https://etherscan.io/address/0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885)  
 
 
 ## Pairs
