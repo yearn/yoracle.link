@@ -8,7 +8,9 @@ UniswapV2SlidingOracles are sliding window oracles that uses observations collec
 
 The `windowSize` is based on the `granularity` supplied by the user. There is a reading every `periodSize` minutes.
 
-## Integrating
+## Price Feeds
+
+### Data Freshness
 
 ```
 // returns the amount out corresponding to the amount in for a given token using the moving average over the time
@@ -28,14 +30,123 @@ IUniswapV2Oracle public constant UniswapV2Oracle = IUniswapV2Oracle(0xCA2E2df6A7
 
 ...
 
-uint _ethOut = UniswapV2Oracle.current(YFI, 1e18, ETH);
+uint _ethOut = UniswapV2Oracle.current(WETH, 1e18, YFI);
 
+```
+
+### Security
+
+A quote allows the caller to specify the `granularity` or amount of `points` to take. Each `point` is `periodSize`, so 24 `points` would be `24 * periodSize` `windowSize`
+
+Data freshness is decreased for increased security
+
+```
+// returns the amount out corresponding to the amount in for a given token using the moving average over the time taking granularity samples
+function quote(address tokenIn, uint amountIn, address tokenOut, uint granularity) external view returns (uint amountOut)
+```
+
+### Price points
+
+Returns a set of price `points` equal to `points * periodSize`, so for the points in the last 24 hours use `points = 48`
+
+```
+// returns an amount of price points equal to periodSize * points
+prices(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+```
+
+### Hourly
+
+Returns a set of price `points` equal to `points * hours`, so for the points in the last 24 hours use `points = 24`
+
+```
+// returns an amount of price points equal to hour * points
+function hourly(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+```
+
+### Daily
+
+Returns a set of price `points` equal to `points * days`, so for the points in the last 24 hours use `points = 1`
+
+```
+// returns an amount of price points equal to days * points
+function daily(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+```
+
+### Weekly
+
+Returns a set of price `points` equal to `points * weeks`, so for the points in the last week use `points = 1`
+
+```
+// returns an amount of price points equal to days * points
+function weekly(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+```
+
+## Volatility
+
+
+### Realized Volatility
+
+Returns the realized volatility over the last amount of `points` per `window * periodSize`, so volatility over last hour would be `points = 1 & window = 2`
+
+```
+// returns realized volatility over points * window
+function realizedVolatility(address tokenIn, uint amountIn, address tokenOut, uint points, uint window) external view returns (uint)
+```
+
+### Hourly Realized Volatility
+
+Returns the realized volatility over the last amount of `points` per `hour`, so volatility over last hour would be `points = 1`
+
+```
+// returns realized volatility over points * window
+function realizedVolatilityHourly(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+```
+
+### Daily Realized Volatility
+
+Returns the realized volatility over the last amount of `points` per `days`, so volatility over last day would be `points = 1`
+
+```
+// returns realized volatility over points * window
+function realizedVolatilityDaily(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+```
+
+### Weekly Realized Volatility
+
+Returns the realized volatility over the last amount of `points` per `weeks`, so volatility over last day week be `points = 1`
+
+```
+// returns realized volatility over points * window
+function realizedVolatilityWeekly(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+```
+
+## Pricing
+
+### Black Scholes Estimate
+
+```
+/**
+ * @dev blackScholesEstimate calculates a rough price estimate for an ATM option
+ * @dev input parameters should be transformed prior to being passed to the function
+ * @dev so as to remove decimal places otherwise results will be far less accurate
+ * @param _vol uint256 volatility of the underlying converted to remove decimals
+ * @param _underlying uint256 price of the underlying asset
+ * @param _time uint256 days to expiration in years multiplied to remove decimals
+ */
+function blackScholesEstimate(
+    uint256 _vol,
+    uint256 _underlying,
+    uint256 _time
+) public pure returns (uint256 estimate) {
+    estimate = 40 * _vol * _underlying * sqrt(_time);
+    return estimate;
+}
 ```
 
 ## Beta Deployment
 
 UniswapV2Oracle [0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885](https://etherscan.io/address/0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885)  
-
+Keep3rV1Oracle [0x73353801921417F465377c8d898c6f4C0270282C](https://etherscan.io/address/0x73353801921417F465377c8d898c6f4C0270282C)  
 
 ## Pairs
 
