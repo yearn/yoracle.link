@@ -1,16 +1,18 @@
-# UniswapV2SlidingOracle
+# Keep3rV1Oracle
 
-UniswapV2SlidingOracle is an on-chain oracle for UniswapV2 pairs.
+Keep3rV1Oracle is an on-chain oracle for UniswapV2 pairs.
 
-## UniswapV2SlidingOracle
+## Keep3rV1Oracle
 
-UniswapV2SlidingOracles are sliding window oracles that uses observations collected over a window to provide moving price averages in the past `windowSize` with a precision of `windowSize / granularity`.
+Keep3rV1Oracles are sliding window oracles that use observations collected over a window to provide moving price averages in the past `windowSize` with a precision of `windowSize / granularity`.
 
 The `windowSize` is based on the `granularity` supplied by the user. There is a reading every `periodSize` minutes.
 
 ## Price Feeds
 
 ### Data Freshness
+
+Contract: Keep3rV1Oracle
 
 ```
 // returns the amount out corresponding to the amount in for a given token using the moving average over the time
@@ -19,22 +21,16 @@ function current(address tokenIn, uint amountIn, address tokenOut) external view
 
 Example;
 
-```text
+```
 interface IUniswapV2Oracle {
   function current(address tokenIn, uint amountIn, address tokenOut) external view returns (uint amountOut);
 }
 
-...
-
-IUniswapV2Oracle public constant UniswapV2Oracle = IUniswapV2Oracle(0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885);
-
-...
-
-uint _ethOut = UniswapV2Oracle.current(WETH, 1e18, YFI);
-
 ```
 
 ### Security
+
+Contract: Keep3rV1Oracle
 
 A quote allows the caller to specify the `granularity` or amount of `points` to take. Each `point` is `periodSize`, so 24 `points` would be `24 * periodSize` `windowSize`
 
@@ -83,6 +79,7 @@ function weekly(address tokenIn, uint amountIn, address tokenOut, uint points) e
 
 ## Volatility
 
+Contract: Keep3rV1Volatility
 
 ### Realized Volatility
 
@@ -90,7 +87,7 @@ Returns the realized volatility over the last amount of `points` per `window * p
 
 ```
 // returns realized volatility over points * window
-function realizedVolatility(address tokenIn, uint amountIn, address tokenOut, uint points, uint window) external view returns (uint)
+function rVol(address tokenIn, address tokenOut, uint points, uint window) external view returns (uint)
 ```
 
 ### Hourly Realized Volatility
@@ -99,7 +96,7 @@ Returns the realized volatility over the last amount of `points` per `hour`, so 
 
 ```
 // returns realized volatility over points * window
-function realizedVolatilityHourly(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+function rVolHourly(address tokenIn, address tokenOut, uint points) external view returns (uint);
 ```
 
 ### Daily Realized Volatility
@@ -108,7 +105,7 @@ Returns the realized volatility over the last amount of `points` per `days`, so 
 
 ```
 // returns realized volatility over points * window
-function realizedVolatilityDaily(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+function rVolDaily(address tokenIn, address tokenOut, uint points) external view returns (uint);
 ```
 
 ### Weekly Realized Volatility
@@ -117,12 +114,14 @@ Returns the realized volatility over the last amount of `points` per `weeks`, so
 
 ```
 // returns realized volatility over points * window
-function realizedVolatilityWeekly(address tokenIn, uint amountIn, address tokenOut, uint points) external view returns (uint[] memory)
+function rVolWeekly(address tokenIn, address tokenOut, uint points) external view returns (uint);
 ```
 
 ## Pricing
 
 ### Black Scholes Estimate
+
+Contract: Keep3rV1Oracle
 
 ```
 /**
@@ -137,30 +136,37 @@ function blackScholesEstimate(
     uint256 _vol,
     uint256 _underlying,
     uint256 _time
-) public pure returns (uint256 estimate) {
-    estimate = 40 * _vol * _underlying * sqrt(_time);
-    return estimate;
-}
+) external pure returns (uint256 estimate);
+```
+
+### Options Pricing
+
+Contract: Keep3rV1Volatility
+
+```
+function C(uint t, uint v, uint sp, uint st) external pure returns (uint);
+function quoteAll(uint t, uint v, uint sp, uint st) external pure returns (uint call, uint put);
+function quotePrice(address tokenIn, address tokenOut, uint t, uint sp, uint st) external view returns (uint call, uint put);
+function price(address tokenIn, address tokenOut) external view returns (uint);
+function quote(address tokenIn, address tokenOut, uint t) external view returns (uint call, uint put);
+```
+
+## Math libs
+
+```
+function optimalExp(uint256 x) external pure returns (uint256);
+function ln(uint256 x) external pure returns (uint);
+function ncdf(uint x) external pure returns (uint);
+function cdf(int x) external pure returns (uint);
+function generalLog(uint256 x) external pure returns (uint);
+
 ```
 
 ## Beta Deployment
 
 UniswapV2Oracle [0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885](https://etherscan.io/address/0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885)  
 Keep3rV1Oracle [0x73353801921417F465377c8d898c6f4C0270282C](https://etherscan.io/address/0x73353801921417F465377c8d898c6f4C0270282C)  
-
-## Pairs
-
-Pair | Address
--- | --
-ETH-WBTC | [0xBb2b8038a1640196FbE3e38816F3e67Cba72D940](https://etherscan.io/address/0xBb2b8038a1640196FbE3e38816F3e67Cba72D940)
-ETH-USDC | [0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc](https://etherscan.io/address/0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc)
-ETH-USDT | [0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852](https://etherscan.io/address/0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852)
-ETH-DAI | [0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11](https://etherscan.io/address/0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11)
-ETH-UNI | [0xd3d2E2692501A5c9Ca623199D38826e513033a17](https://etherscan.io/address/0xd3d2E2692501A5c9Ca623199D38826e513033a17)
-YFI-ETH | [0x2fDbAdf3C4D5A8666Bc06645B8358ab803996E28](https://etherscan.io/address/0x2fDbAdf3C4D5A8666Bc06645B8358ab803996E28)
-MKR-ETH | [0xC2aDdA861F89bBB333c90c492cB837741916A225](https://etherscan.io/address/0xC2aDdA861F89bBB333c90c492cB837741916A225)
-AAVE-ETH | [0xDFC14d2Af169B0D36C4EFF567Ada9b2E0CAE044f](https://etherscan.io/address/0xDFC14d2Af169B0D36C4EFF567Ada9b2E0CAE044f)
-COMP-ETH | [0xCFfDdeD873554F362Ac02f8Fb1f02E5ada10516f](https://etherscan.io/address/0xCFfDdeD873554F362Ac02f8Fb1f02E5ada10516f)
+Keep3rV1Volatility [0xCCdfCB72753CfD55C5afF5d98eA5f9C43be9659d](https://etherscan.io/address/0xCCdfCB72753CfD55C5afF5d98eA5f9C43be9659d)  
 
 ## Tokens
 
@@ -179,3 +185,8 @@ KP3R |  [0x1ceb5cb57c4d4e2b2433641b95dd330a33185a44](https://etherscan.io/addres
 SNX |  [0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f](https://etherscan.io/address/0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f)
 LINK |  [0x514910771af9ca656af840dff83e8264ecf986ca](https://etherscan.io/address/0x514910771af9ca656af840dff83e8264ecf986ca)
 CRV |  [0xd533a949740bb3306d119cc777fa900ba034cd52](https://etherscan.io/address/0xd533a949740bb3306d119cc777fa900ba034cd52)
+UMA |  [0x04fa0d235c4abf4bcf4787af4cf447de572ef828](https://etherscan.io/address/0x04fa0d235c4abf4bcf4787af4cf447de572ef828)
+renBTC |  [0xeb4c2781e4eba804ce9a9803c67d0893436bb27d](https://etherscan.io/address/0xeb4c2781e4eba804ce9a9803c67d0893436bb27d)
+HEGIC |  [0x584bc13c7d411c00c01a62e8019472de68768430](https://etherscan.io/address/0x584bc13c7d411c00c01a62e8019472de68768430)
+COL |  [0xc76fb75950536d98fa62ea968e1d6b45ffea2a55](https://etherscan.io/address/0xc76fb75950536d98fa62ea968e1d6b45ffea2a55)
+STAKE |  [0x0ae055097c6d159879521c384f1d2123d1f195e6](https://etherscan.io/address/0x0ae055097c6d159879521c384f1d2123d1f195e6)
