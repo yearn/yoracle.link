@@ -164,9 +164,10 @@ function generalLog(uint256 x) external pure returns (uint);
 
 ## Beta Deployment
 
-UniswapV2Oracle [0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885](https://etherscan.io/address/0xCA2E2df6A7a7Cf5bd19D112E8568910a6C2D3885)  
-Keep3rV1Oracle [0x73353801921417F465377c8d898c6f4C0270282C](https://etherscan.io/address/0x73353801921417F465377c8d898c6f4C0270282C)  
-Keep3rV1Volatility [0xCCdfCB72753CfD55C5afF5d98eA5f9C43be9659d](https://etherscan.io/address/0xCCdfCB72753CfD55C5afF5d98eA5f9C43be9659d)  
+UniswapKeep3rV1Oracle [0x73353801921417F465377c8d898c6f4C0270282C](https://etherscan.io/address/0x73353801921417F465377c8d898c6f4C0270282C)  
+UniswapKeep3rV1Volatility [0xCCdfCB72753CfD55C5afF5d98eA5f9C43be9659d](https://etherscan.io/address/0xCCdfCB72753CfD55C5afF5d98eA5f9C43be9659d)  
+SushiswapKeep3rV1Oracle [0xf67Ab1c914deE06Ba0F264031885Ea7B276a7cDa](https://etherscan.io/address/0xf67Ab1c914deE06Ba0F264031885Ea7B276a7cDa)  
+SushiswapKeep3rV1Volatility [0x173ed6531818456f29Fc74011a3B1FB4B6132Dc9](https://etherscan.io/address/0x173ed6531818456f29Fc74011a3B1FB4B6132Dc9)  
 
 ## Tokens
 
